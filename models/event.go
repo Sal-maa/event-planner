@@ -12,5 +12,5 @@ type Event struct {
 	Description string    `json:"description" form:"description"`
 	Location    string    `json:"location" form:"location"`
 	Date        time.Time `json:"date" form:"date"`
-	Quote       int       `json:"quota" form:"quota"`
+	Quota       int       `json:"quota" form:"quota"`
 }

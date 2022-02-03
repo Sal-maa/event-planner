@@ -60,8 +60,8 @@ type Query {
 
   getEvents: [Event]!
   getEvent(id: Int!): Event!
-  getEventKeyword(keyword: String!): Event!
-  getEventLocation(location: String!): Event!
+  getEventKeyword(keyword: String!): [Event]!
+  getEventLocation(location: String!): [Event]!
 
   getComments(eventID: Int!): [Comment]!
 
