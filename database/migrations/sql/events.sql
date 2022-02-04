@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS `event`;
+DROP TABLE IF EXISTS `events`;
 
-CREATE TABLE `event` (
+CREATE TABLE `events` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned DEFAULT NULL,
   `image` longtext,

@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS `participant`;
+DROP TABLE IF EXISTS `participants`;
 
-CREATE TABLE `participant` (
+CREATE TABLE `participants` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `event_id` bigint unsigned DEFAULT NULL,
   `user_id` bigint unsigned DEFAULT NULL,

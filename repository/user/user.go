@@ -16,7 +16,7 @@ func New(db *sql.DB) *UserRepository {
 	}
 }
 
-func (r *UserRepository) Create(user _models.User) (_models.User, error) {
+func (r *UserRepository) Register(user _models.User) (_models.User, error) {
 	_, err := r.db.Exec("INSERT INTO users(name,email,password,address,occupation) VALUES(?,?,?,?,?)", user.Name, user.Email, user.Password, user.Address, user.Occupation)
 	return user, err
 }

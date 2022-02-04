@@ -3,8 +3,9 @@ package event
 import _models "github.com/justjundana/event-planner/models"
 
 type EventInterface interface {
-	Get() ([]_models.Event, error)
-	GetById(id int) (_models.Event, error)
-	GetByKey(keyword string) ([]_models.Event, error)
-	GetByLocation(location string) ([]_models.Event, error)
+	GetEvents() ([]_models.Event, error)
+	GetEvent(id int) (_models.Event, error)
+	GetEventKeyword(keyword string) ([]_models.Event, error)
+	GetEventLocation(location string) ([]_models.Event, error)
+	GetOwnEvent(userID int) ([]_models.Event, error)
 }

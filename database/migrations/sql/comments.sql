@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS `comment`;
+DROP TABLE IF EXISTS `comments`;
 
-CREATE TABLE `comment` (
+CREATE TABLE `comments` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned DEFAULT NULL,
   `event_id` bigint unsigned DEFAULT NULL,

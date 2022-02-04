@@ -75,18 +75,19 @@ type ComplexityRoot struct {
 	Participant struct {
 		EventID func(childComplexity int) int
 		ID      func(childComplexity int) int
+		Status  func(childComplexity int) int
 		UserID  func(childComplexity int) int
 	}
 
 	Query struct {
 		GetComments      func(childComplexity int, eventID int) int
 		GetEvent         func(childComplexity int, id int) int
-		GetEventKeyword  func(childComplexity int, keyword string) int
-		GetEventLocation func(childComplexity int, location string) int
+		GetEventKeyword  func(childComplexity int, search string) int
+		GetEventLocation func(childComplexity int, search string) int
 		GetEvents        func(childComplexity int) int
+		GetOwnEvent      func(childComplexity int) int
 		GetParticipants  func(childComplexity int, eventID int) int
 		GetProfile       func(childComplexity int) int
-		GetProfileEvent  func(childComplexity int) int
 		GetUser          func(childComplexity int, id int) int
 		GetUsers         func(childComplexity int) int
 		Login            func(childComplexity int, email string, password string) int
@@ -109,13 +110,13 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Login(ctx context.Context, email string, password string) (*model.LoginResponse, error)
 	GetProfile(ctx context.Context) (*models.User, error)
-	GetProfileEvent(ctx context.Context) ([]*models.Event, error)
 	GetUsers(ctx context.Context) ([]*models.User, error)
 	GetUser(ctx context.Context, id int) (*models.User, error)
+	GetOwnEvent(ctx context.Context) ([]*models.Event, error)
 	GetEvents(ctx context.Context) ([]*models.Event, error)
 	GetEvent(ctx context.Context, id int) (*models.Event, error)
-	GetEventKeyword(ctx context.Context, keyword string) ([]*models.Event, error)
-	GetEventLocation(ctx context.Context, location string) ([]*models.Event, error)
+	GetEventKeyword(ctx context.Context, search string) ([]*models.Event, error)
+	GetEventLocation(ctx context.Context, search string) ([]*models.Event, error)
 	GetComments(ctx context.Context, eventID int) ([]*models.Comment, error)
 	GetParticipants(ctx context.Context, eventID int) ([]*models.Participant, error)
 }
@@ -259,6 +260,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Participant.ID(childComplexity), true
 
+	case "Participant.status":
+		if e.complexity.Participant.Status == nil {
+			break
+		}
+
+		return e.complexity.Participant.Status(childComplexity), true
+
 	case "Participant.userID":
 		if e.complexity.Participant.UserID == nil {
 			break
@@ -300,7 +308,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetEventKeyword(childComplexity, args["keyword"].(string)), true
+		return e.complexity.Query.GetEventKeyword(childComplexity, args["search"].(string)), true
 
 	case "Query.getEventLocation":
 		if e.complexity.Query.GetEventLocation == nil {
@@ -312,7 +320,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetEventLocation(childComplexity, args["location"].(string)), true
+		return e.complexity.Query.GetEventLocation(childComplexity, args["search"].(string)), true
 
 	case "Query.getEvents":
 		if e.complexity.Query.GetEvents == nil {
@@ -320,6 +328,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetEvents(childComplexity), true
+
+	case "Query.getOwnEvent":
+		if e.complexity.Query.GetOwnEvent == nil {
+			break
+		}
+
+		return e.complexity.Query.GetOwnEvent(childComplexity), true
 
 	case "Query.getParticipants":
 		if e.complexity.Query.GetParticipants == nil {
@@ -339,13 +354,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetProfile(childComplexity), true
-
-	case "Query.getProfileEvent":
-		if e.complexity.Query.GetProfileEvent == nil {
-			break
-		}
-
-		return e.complexity.Query.GetProfileEvent(childComplexity), true
 
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
@@ -532,6 +540,7 @@ type Participant {
   id: ID!
   eventID: Int!
   userID: Int!
+  status: Boolean!
 }
 
 input NewUser {
@@ -544,17 +553,16 @@ input NewUser {
 
 type Query {
   login(email: String!, password: String!): LoginResponse!
-
   getProfile: User!
-  getProfileEvent: [Event]!
-
+ 
   getUsers: [User]!
   getUser(id: Int!): User!
 
+  getOwnEvent: [Event]!
   getEvents: [Event]!
   getEvent(id: Int!): Event!
-  getEventKeyword(keyword: String!): [Event]!
-  getEventLocation(location: String!): [Event]!
+  getEventKeyword(search: String!): [Event]!
+  getEventLocation(search: String!): [Event]!
 
   getComments(eventID: Int!): [Comment]!
 
@@ -622,14 +630,14 @@ func (ec *executionContext) field_Query_getEventKeyword_args(ctx context.Context
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["keyword"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("keyword"))
+	if tmp, ok := rawArgs["search"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["keyword"] = arg0
+	args["search"] = arg0
 	return args, nil
 }
 
@@ -637,14 +645,14 @@ func (ec *executionContext) field_Query_getEventLocation_args(ctx context.Contex
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["location"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
+	if tmp, ok := rawArgs["search"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["location"] = arg0
+	args["search"] = arg0
 	return args, nil
 }
 
@@ -1389,6 +1397,41 @@ func (ec *executionContext) _Participant_userID(ctx context.Context, field graph
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Participant_status(ctx context.Context, field graphql.CollectedField, obj *models.Participant) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Participant",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_login(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1466,41 +1509,6 @@ func (ec *executionContext) _Query_getProfile(ctx context.Context, field graphql
 	return ec.marshalNUser2ᚖgithubᚗcomᚋjustjundanaᚋeventᚑplannerᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getProfileEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetProfileEvent(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*models.Event)
-	fc.Result = res
-	return ec.marshalNEvent2ᚕᚖgithubᚗcomᚋjustjundanaᚋeventᚑplannerᚋmodelsᚐEvent(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_getUsers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1576,6 +1584,41 @@ func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.Co
 	res := resTmp.(*models.User)
 	fc.Result = res
 	return ec.marshalNUser2ᚖgithubᚗcomᚋjustjundanaᚋeventᚑplannerᚋmodelsᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getOwnEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetOwnEvent(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Event)
+	fc.Result = res
+	return ec.marshalNEvent2ᚕᚖgithubᚗcomᚋjustjundanaᚋeventᚑplannerᚋmodelsᚐEvent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getEvents(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1680,7 +1723,7 @@ func (ec *executionContext) _Query_getEventKeyword(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetEventKeyword(rctx, args["keyword"].(string))
+		return ec.resolvers.Query().GetEventKeyword(rctx, args["search"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1722,7 +1765,7 @@ func (ec *executionContext) _Query_getEventLocation(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetEventLocation(rctx, args["location"].(string))
+		return ec.resolvers.Query().GetEventLocation(rctx, args["search"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3604,6 +3647,16 @@ func (ec *executionContext) _Participant(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "status":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Participant_status(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3680,29 +3733,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Concurrently(i, func() graphql.Marshaler {
 				return rrm(innerCtx)
 			})
-		case "getProfileEvent":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getProfileEvent(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return rrm(innerCtx)
-			})
 		case "getUsers":
 			field := field
 
@@ -3736,6 +3766,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getUser(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "getOwnEvent":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getOwnEvent(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

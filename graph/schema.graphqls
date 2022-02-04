@@ -39,6 +39,7 @@ type Participant {
   id: ID!
   eventID: Int!
   userID: Int!
+  status: Boolean!
 }
 
 input NewUser {
@@ -51,17 +52,16 @@ input NewUser {
 
 type Query {
   login(email: String!, password: String!): LoginResponse!
-
   getProfile: User!
-  getProfileEvent: [Event]!
-
+ 
   getUsers: [User]!
   getUser(id: Int!): User!
 
+  getOwnEvent: [Event]!
   getEvents: [Event]!
   getEvent(id: Int!): Event!
-  getEventKeyword(keyword: String!): [Event]!
-  getEventLocation(location: String!): [Event]!
+  getEventKeyword(search: String!): [Event]!
+  getEventLocation(search: String!): [Event]!
 
   getComments(eventID: Int!): [Comment]!
 
