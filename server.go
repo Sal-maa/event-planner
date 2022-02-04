@@ -21,7 +21,7 @@ import (
 
 func main() {
 	db := _config.FetchConnection()
-	//CORS
+
 	router := chi.NewRouter()
 	corsOptions := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
