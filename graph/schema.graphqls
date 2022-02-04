@@ -7,6 +7,12 @@ type LoginResponse {
   token: String!
 }
 
+type Response {
+  code: Int!
+  message: String!
+  success: Boolean!
+}
+
 type User {
   id: ID!
   name: String!
@@ -48,6 +54,60 @@ input NewUser {
   password: String!
   address: String!
   occupation: String!
+  phone: String!
+}
+
+input EditUser {
+  name: String
+  email: String
+  password: String
+  address: String
+  occupation: String
+  phone: String
+}
+
+input NewEvent {
+	userID: Int
+	image: String!
+	title: String!
+	description: String!
+	location: String!
+	date: Time!
+	quota: Int!
+}
+
+input EditEvent {
+	userID: Int!
+	image: String
+	title: String
+	description: String
+	location: String
+	date: Time
+	quota: Int
+}
+
+input NewParticipant {
+	userID: Int!
+	eventID: Int!
+	status: Boolean!
+}
+
+input EditParticipant {
+	userID: Int
+	eventID: Int
+	Status: Boolean
+}
+
+input NewComment {
+	userID: Int!
+	eventID: Int!
+	status: Boolean!
+}
+
+input EditComment {
+	userID: Int
+	eventID: Int
+	content: String
 }
 
 type Query {
@@ -70,6 +130,21 @@ type Query {
 
 type Mutation {
   register(input: NewUser): User!
+  
+  updateUser(input: EditUser): Response!
+  deleteUser: Response!
+
+  createEvent(input: NewEvent): Response!
+  updateEvent(id: Int!, input: EditEvent): Response!
+  deleteEvent(id: Int!): Response!
+
+  createParticipant(input: NewParticipant): Response!
+  updateParticipant(id: Int!, input: EditParticipant): Response!
+  deleteParticipant(id: Int!): Response!
+
+  createComment(input: NewComment): Response!
+  updateComment(id: Int!, input: EditComment): Response!
+  deleteComment(id: Int!): Response!
 }
 
 scalar Time

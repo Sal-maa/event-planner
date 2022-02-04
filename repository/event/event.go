@@ -119,3 +119,8 @@ func (r *EventRepository) GetOwnEvent(userID int) ([]_models.Event, error) {
 
 	return events, nil
 }
+
+func (r *EventRepository) CreateEvent(event _models.Event) error {
+	_, err := r.db.Exec("INSERT INTO events(user_id, image, title, description, location, date, quota) VALUES(?,?,?,?,?,?,?)", event.UserID, event.Image, event.Title, event.Description, event.Location, event.Date, event.Quota)
+	return err
+}

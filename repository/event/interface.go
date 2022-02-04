@@ -8,4 +8,5 @@ type EventInterface interface {
 	GetEventKeyword(keyword string) ([]_models.Event, error)
 	GetEventLocation(location string) ([]_models.Event, error)
 	GetOwnEvent(userID int) ([]_models.Event, error)
+	CreateEvent(event _models.Event) error
 }

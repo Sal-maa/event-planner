@@ -24,14 +24,105 @@ func (r *mutationResolver) Register(ctx context.Context, input *_model.NewUser) 
 	userData.Password = string(passwordHash)
 	userData.Address = input.Address
 	userData.Occupation = input.Occupation
+	userData.Phone = input.Phone
 
 	responseData, err := r.userRepository.Register(userData)
 	return &responseData, err
 }
 
+func (r *mutationResolver) UpdateUser(ctx context.Context, input *_model.EditUser) (*_model.Response, error) {
+	userId := _middleware.ForContext(ctx)
+	if userId == nil {
+		return &_model.Response{}, errors.New("unauthorized")
+	}
+	user, err := r.userRepository.Profile(userId.ID)
+	if err != nil {
+		return nil, errors.New("not found")
+	}
+
+	user.Name = *input.Name
+	user.Email = *input.Email
+	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(*input.Password), bcrypt.MinCost)
+	user.Password = string(passwordHash)
+	user.Address = *input.Address
+	user.Occupation = *input.Occupation
+	user.Phone = *input.Phone
+
+	updateErr := r.userRepository.UpdateUser(user)
+	return &_model.Response{Code: 200, Message: "Update data Success", Success: true}, updateErr
+}
+
+func (r *mutationResolver) DeleteUser(ctx context.Context) (*_model.Response, error) {
+	userId := _middleware.ForContext(ctx)
+	if userId == nil {
+		return &_model.Response{}, errors.New("unauthorized")
+	}
+
+	user, err := r.userRepository.Profile(userId.ID)
+	if err != nil {
+		return nil, errors.New("not found")
+	}
+
+	deleteErr := r.userRepository.DeleteUser(user)
+	return &_model.Response{Code: 200, Message: "Delete data Success", Success: true}, deleteErr
+}
+
+func (r *mutationResolver) CreateEvent(ctx context.Context, input *_model.NewEvent) (*_model.Response, error) {
+	userId := _middleware.ForContext(ctx)
+	if userId == nil {
+		return &_model.Response{}, errors.New("unauthorized")
+	}
+
+	fmt.Println("date", input.Date)
+	eventData := _models.Event{}
+	eventData.UserID = userId.ID
+	eventData.Title = input.Title
+	eventData.Image = input.Image
+	eventData.Description = input.Description
+	eventData.Location = input.Location
+	eventData.Date = input.Date
+	eventData.Quota = input.Quota
+
+	createErr := r.eventRepository.CreateEvent(eventData)
+	return &_model.Response{Code: 200, Message: "Create event Success", Success: true}, createErr
+}
+
+func (r *mutationResolver) UpdateEvent(ctx context.Context, id int, input *_model.EditEvent) (*_model.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DeleteEvent(ctx context.Context, id int) (*_model.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) CreateParticipant(ctx context.Context, input *_model.NewParticipant) (*_model.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) UpdateParticipant(ctx context.Context, id int, input *_model.EditParticipant) (*_model.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DeleteParticipant(ctx context.Context, id int) (*_model.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) CreateComment(ctx context.Context, input *_model.NewComment) (*_model.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) UpdateComment(ctx context.Context, id int, input *_model.EditComment) (*_model.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DeleteComment(ctx context.Context, id int) (*_model.Response, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *queryResolver) Login(ctx context.Context, email string, password string) (*_model.LoginResponse, error) {
 	user, err := r.userRepository.Login(email)
 	if err != nil {
+		fmt.Println(err)
 		return nil, errors.New("not found")
 	}
 
