@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS `participants`;
-
-CREATE TABLE `participants` (
+CREATE TABLE IF NOT EXISTS eplanner.participants (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `event_id` bigint unsigned DEFAULT NULL,
   `user_id` bigint unsigned DEFAULT NULL,

@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS `users`;
-
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS eplanner.users (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `name` longtext,
   `email` longtext,

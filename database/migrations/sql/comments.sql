@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS `comments`;
-
-CREATE TABLE `comments` (
+CREATE TABLE IF NOT EXISTS eplanner.comments (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned DEFAULT NULL,
   `event_id` bigint unsigned DEFAULT NULL,

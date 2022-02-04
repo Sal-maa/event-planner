@@ -5,7 +5,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: toor
-      MYSQL_DATABASE: event-planner
+      MYSQL_DATABASE: eplanner
     ports: 
       - 3306:3306
     volumes:

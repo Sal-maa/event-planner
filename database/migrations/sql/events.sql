@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS `events`;
-
-CREATE TABLE `events` (
+CREATE TABLE IF NOT EXISTS eplanner.events (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint unsigned DEFAULT NULL,
   `image` longtext,
