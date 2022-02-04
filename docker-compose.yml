@@ -9,7 +9,7 @@ services:
     ports: 
       - 3306:3306
     volumes:
-      - ./database/migration/sql:/docker-entrypoint-initdb.d/database/migration/sql
+      - ./database/migrations/sql:/docker-entrypoint-initdb.d/database/migrations/sql
 
     healthcheck:
       test: ["CMD", "mysql", "-u", "root",  "-ptoor", "-e", "show schemas"]

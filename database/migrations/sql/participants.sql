@@ -7,6 +7,6 @@ CREATE TABLE IF NOT EXISTS eplanner.participants (
   UNIQUE KEY `id` (`id`),
   KEY `event_id` (`event_id`),
   KEY `user_id` (`user_id`),
-  CONSTRAINT `participant_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `event` (`id`) ON UPDATE CASCADE,
+  CONSTRAINT `participant_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `participant_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
