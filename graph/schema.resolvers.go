@@ -30,11 +30,9 @@ func (r *mutationResolver) Register(ctx context.Context, input *_model.NewUser) 
 }
 
 func (r *queryResolver) Login(ctx context.Context, email string, password string) (*_model.LoginResponse, error) {
-	var user _models.User
-
 	user, err := r.userRepository.Login(email)
 	if err != nil {
-		return &_model.LoginResponse{}, err
+		return nil, errors.New("not found")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
@@ -55,7 +53,7 @@ func (r *queryResolver) GetProfile(ctx context.Context) (*_models.User, error) {
 
 	responseData, err := r.userRepository.Profile(userId.ID)
 	if err != nil {
-		return &responseData, err
+		return nil, err
 	}
 
 	dataUser := _models.User{
@@ -100,52 +98,51 @@ func (r *queryResolver) GetOwnEvent(ctx context.Context) ([]*_models.Event, erro
 		return []*_models.Event{}, errors.New("unauthorized")
 	}
 
-	eventResponseData := []*_models.Event{}
+	events := []*_models.Event{}
 
 	responseData, err := r.eventRepository.GetOwnEvent(userId.ID)
-
 	if err != nil {
 		return nil, errors.New("not found")
 	}
 
-	for _, v := range responseData {
-		eventResponseData = append(eventResponseData, &_models.Event{
-			ID:          v.ID,
-			UserID:      v.UserID,
-			Image:       v.Image,
-			Title:       v.Title,
-			Description: v.Description,
-			Location:    v.Location,
-			Date:        v.Date,
-			Quota:       v.Quota,
+	for _, data := range responseData {
+		events = append(events, &_models.Event{
+			ID:          data.ID,
+			UserID:      data.UserID,
+			Image:       data.Image,
+			Title:       data.Title,
+			Description: data.Description,
+			Location:    data.Location,
+			Date:        data.Date,
+			Quota:       data.Quota,
 		})
 	}
 
-	return eventResponseData, nil
+	return events, nil
 }
 
 func (r *queryResolver) GetEvents(ctx context.Context) ([]*_models.Event, error) {
-	eventResponseData := []*_models.Event{}
+	events := []*_models.Event{}
 
 	responseData, err := r.eventRepository.GetEvents()
 	if err != nil {
 		return nil, errors.New("not found")
 	}
 
-	for _, v := range responseData {
-		eventResponseData = append(eventResponseData, &_models.Event{
-			ID:          v.ID,
-			UserID:      v.UserID,
-			Image:       v.Image,
-			Title:       v.Title,
-			Description: v.Description,
-			Location:    v.Location,
-			Date:        v.Date,
-			Quota:       v.Quota,
+	for _, data := range responseData {
+		events = append(events, &_models.Event{
+			ID:          data.ID,
+			UserID:      data.UserID,
+			Image:       data.Image,
+			Title:       data.Title,
+			Description: data.Description,
+			Location:    data.Location,
+			Date:        data.Date,
+			Quota:       data.Quota,
 		})
 	}
 
-	return eventResponseData, nil
+	return events, nil
 }
 
 func (r *queryResolver) GetEvent(ctx context.Context, id int) (*_models.Event, error) {
@@ -158,94 +155,91 @@ func (r *queryResolver) GetEvent(ctx context.Context, id int) (*_models.Event, e
 }
 
 func (r *queryResolver) GetEventKeyword(ctx context.Context, search string) ([]*_models.Event, error) {
-	// fmt.Println("jalan", keyword)
-	eventResponseData := []*_models.Event{}
+	events := []*_models.Event{}
+
 	responseData, err := r.eventRepository.GetEventKeyword(search)
 	if err != nil {
 		return nil, errors.New("not found")
 	}
-	// fmt.Println("respondata", responseData)
-	for _, v := range responseData {
-		eventResponseData = append(eventResponseData, &_models.Event{
-			ID:          v.ID,
-			UserID:      v.UserID,
-			Image:       v.Image,
-			Title:       v.Title,
-			Description: v.Description,
-			Location:    v.Location,
-			Date:        v.Date,
-			Quota:       v.Quota,
+
+	for _, data := range responseData {
+		events = append(events, &_models.Event{
+			ID:          data.ID,
+			UserID:      data.UserID,
+			Image:       data.Image,
+			Title:       data.Title,
+			Description: data.Description,
+			Location:    data.Location,
+			Date:        data.Date,
+			Quota:       data.Quota,
 		})
 	}
 
-	return eventResponseData, nil
+	return events, nil
 }
 
 func (r *queryResolver) GetEventLocation(ctx context.Context, search string) ([]*_models.Event, error) {
-	eventResponseData := []*_models.Event{}
+	events := []*_models.Event{}
+
 	responseData, err := r.eventRepository.GetEventLocation(search)
 	if err != nil {
 		return nil, errors.New("not found")
 	}
 
-	if err != nil {
-		return nil, errors.New("not found")
-	}
-
-	for _, v := range responseData {
-		eventResponseData = append(eventResponseData, &_models.Event{
-			ID:          v.ID,
-			UserID:      v.UserID,
-			Image:       v.Image,
-			Title:       v.Title,
-			Description: v.Description,
-			Location:    v.Location,
-			Date:        v.Date,
-			Quota:       v.Quota,
+	for _, data := range responseData {
+		events = append(events, &_models.Event{
+			ID:          data.ID,
+			UserID:      data.UserID,
+			Image:       data.Image,
+			Title:       data.Title,
+			Description: data.Description,
+			Location:    data.Location,
+			Date:        data.Date,
+			Quota:       data.Quota,
 		})
 	}
 
-	return eventResponseData, nil
+	return events, nil
 }
 
 func (r *queryResolver) GetComments(ctx context.Context, eventID int) ([]*_models.Comment, error) {
-	commentResponseData := []*_models.Comment{}
+	comments := []*_models.Comment{}
 
 	responseData, err := r.commentRepository.GetComments(eventID)
 	if err != nil {
 		return nil, errors.New("not found")
 	}
 
-	for _, v := range responseData {
-		commentResponseData = append(commentResponseData, &_models.Comment{
-			ID:      v.ID,
-			EventID: v.EventID,
-			UserID:  v.UserID,
-			Content: v.Content,
+	for _, data := range responseData {
+		comments = append(comments, &_models.Comment{
+			ID:      data.ID,
+			EventID: data.EventID,
+			UserID:  data.UserID,
+			Content: data.Content,
 		})
 	}
 
-	return commentResponseData, nil
+	return comments, nil
 }
 
 func (r *queryResolver) GetParticipants(ctx context.Context, eventID int) ([]*_models.Participant, error) {
-	participantResponseData := []*_models.Participant{}
+	participants := []*_models.Participant{}
 
 	responseData, err := r.participantRepository.GetParticipants(eventID)
 	if err != nil {
 		return nil, errors.New("not found")
 	}
 
-	for _, v := range responseData {
-		participantResponseData = append(participantResponseData, &_models.Participant{
-			ID:      v.ID,
-			EventID: v.EventID,
-			UserID:  v.UserID,
-			Status:  v.Status,
+	for _, data := range responseData {
+		participants = append(participants, &_models.Participant{
+			ID:      data.ID,
+			EventID: data.EventID,
+			UserID:  data.UserID,
+			Status:  data.Status,
 		})
 	}
 
-	return participantResponseData, nil
+	return participants, nil
 }
 
 // Mutation returns _generated.MutationResolver implementation.
