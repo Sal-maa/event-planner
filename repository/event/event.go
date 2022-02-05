@@ -97,6 +97,43 @@ func (r *EventRepository) GetEventLocation(location string) ([]_models.Event, er
 	return events, nil
 }
 
+func (r *EventRepository) GetEventMostAttendant() ([]_models.Event, error) {
+	var events []_models.Event
+	rows, err := r.db.Query(`
+	SELECT
+		events.id, events.user_id, events.category_id, events.image, events.title, events.description, events.location, events.date, events.quota,
+		COUNT(participants.event_id) AS NumberOfParticipant
+	FROM
+		events
+	JOIN 
+		participants ON participants.event_id = events.id
+	WHERE
+		CURRENT_TIMESTAMP < events.date
+	GROUP BY 
+		participants.event_id
+	ORDER BY 
+		NumberOfParticipant DESC
+	LIMIT 4`)
+	if err != nil {
+		log.Fatalf("Error")
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var event _models.Event
+
+		err = rows.Scan(&event.ID, &event.UserID, &event.CategoryId, &event.Image, &event.Title, &event.Description, &event.Location, &event.Date, &event.Quota, &event.UserID)
+		if err != nil {
+			log.Fatalf("Error")
+		}
+
+		events = append(events, event)
+	}
+
+	return events, nil
+}
+
 func (r *EventRepository) GetOwnEvent(userID int) ([]_models.Event, error) {
 	var events []_models.Event
 	rows, err := r.db.Query(`SELECT id, user_id, image, title,category_id, description, location, date, quota FROM events WHERE user_id = ?`, userID)

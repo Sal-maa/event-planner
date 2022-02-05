@@ -56,6 +56,7 @@ type ComplexityRoot struct {
 	}
 
 	Event struct {
+		CategoryId  func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
 		Date        func(childComplexity int) int
 		DeletedAt   func(childComplexity int) int
@@ -100,17 +101,18 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetComments      func(childComplexity int, eventID int) int
-		GetEvent         func(childComplexity int, id int) int
-		GetEventKeyword  func(childComplexity int, search string) int
-		GetEventLocation func(childComplexity int, search string) int
-		GetEvents        func(childComplexity int) int
-		GetOwnEvent      func(childComplexity int) int
-		GetParticipants  func(childComplexity int, eventID int) int
-		GetProfile       func(childComplexity int) int
-		GetUser          func(childComplexity int, id int) int
-		GetUsers         func(childComplexity int) int
-		Login            func(childComplexity int, email string, password string) int
+		GetComments           func(childComplexity int, eventID int) int
+		GetEvent              func(childComplexity int, id int) int
+		GetEventKeyword       func(childComplexity int, search string) int
+		GetEventLocation      func(childComplexity int, search string) int
+		GetEventMostAttendant func(childComplexity int) int
+		GetEvents             func(childComplexity int) int
+		GetOwnEvent           func(childComplexity int) int
+		GetParticipants       func(childComplexity int, eventID int) int
+		GetProfile            func(childComplexity int) int
+		GetUser               func(childComplexity int, id int) int
+		GetUsers              func(childComplexity int) int
+		Login                 func(childComplexity int, email string, password string) int
 	}
 
 	Response struct {
@@ -157,6 +159,7 @@ type QueryResolver interface {
 	GetEvent(ctx context.Context, id int) (*models.Event, error)
 	GetEventKeyword(ctx context.Context, search string) ([]*models.Event, error)
 	GetEventLocation(ctx context.Context, search string) ([]*models.Event, error)
+	GetEventMostAttendant(ctx context.Context) ([]*models.Event, error)
 	GetComments(ctx context.Context, eventID int) ([]*models.Comment, error)
 	GetParticipants(ctx context.Context, eventID int) ([]*models.Participant, error)
 }
@@ -224,6 +227,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Comment.UserID(childComplexity), true
+
+	case "Event.categoryID":
+		if e.complexity.Event.CategoryId == nil {
+			break
+		}
+
+		return e.complexity.Event.CategoryId(childComplexity), true
 
 	case "Event.createdAt":
 		if e.complexity.Event.CreatedAt == nil {
@@ -552,6 +562,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetEventLocation(childComplexity, args["search"].(string)), true
 
+	case "Query.getEventMostAttendant":
+		if e.complexity.Query.GetEventMostAttendant == nil {
+			break
+		}
+
+		return e.complexity.Query.GetEventMostAttendant(childComplexity), true
+
 	case "Query.getEvents":
 		if e.complexity.Query.GetEvents == nil {
 			break
@@ -802,6 +819,7 @@ type User {
 type Event {
   id: ID!
   userID: Int
+  categoryID: Int!
   image: String!
   title: String!
   description: String!
@@ -855,7 +873,7 @@ input NewEvent {
 	userID: Int
 	image: String!
 	title: String!
-  category_id: Int!
+  categoryID: Int!
 	description: String!
 	location: String!
 	date: Time!
@@ -865,7 +883,7 @@ input NewEvent {
 input EditEvent {
 	image: String
 	title: String
-  category_id: Int
+  categoryID: Int
 	description: String
 	location: String
 	date: Time
@@ -902,6 +920,7 @@ type Query {
   getEvent(id: Int!): Event!
   getEventKeyword(search: String!): [Event]!
   getEventLocation(search: String!): [Event]!
+  getEventMostAttendant: [Event]!
 
   getComments(eventID: Int!): [Comment]!
 
@@ -1604,6 +1623,41 @@ func (ec *executionContext) _Event_userID(ctx context.Context, field graphql.Col
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalOInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Event_categoryID(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CategoryId, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Event_image(ctx context.Context, field graphql.CollectedField, obj *models.Event) (ret graphql.Marshaler) {
@@ -3067,6 +3121,41 @@ func (ec *executionContext) _Query_getEventLocation(ctx context.Context, field g
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().GetEventLocation(rctx, args["search"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Event)
+	fc.Result = res
+	return ec.marshalNEvent2ᚕᚖgithubᚗcomᚋjustjundanaᚋeventᚑplannerᚋmodelsᚐEvent(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getEventMostAttendant(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetEventMostAttendant(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4863,10 +4952,10 @@ func (ec *executionContext) unmarshalInputEditEvent(ctx context.Context, obj int
 			if err != nil {
 				return it, err
 			}
-		case "category_id":
+		case "categoryID":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category_id"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("categoryID"))
 			it.CategoryID, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
@@ -5059,10 +5148,10 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "category_id":
+		case "categoryID":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("category_id"))
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("categoryID"))
 			it.CategoryID, err = ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
@@ -5325,6 +5414,16 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 
 			out.Values[i] = innerFunc(ctx)
 
+		case "categoryID":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Event_categoryID(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "image":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Event_image(ctx, field, obj)
@@ -5921,6 +6020,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getEventLocation(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "getEventMostAttendant":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getEventMostAttendant(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}

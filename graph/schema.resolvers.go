@@ -442,6 +442,31 @@ func (r *queryResolver) GetEventLocation(ctx context.Context, search string) ([]
 	return events, nil
 }
 
+func (r *queryResolver) GetEventMostAttendant(ctx context.Context) ([]*_models.Event, error) {
+	events := []*_models.Event{}
+
+	responseData, err := r.eventRepository.GetEventMostAttendant()
+	if err != nil {
+		return nil, errors.New("not found")
+	}
+
+	for _, data := range responseData {
+		events = append(events, &_models.Event{
+			ID:          data.ID,
+			UserID:      data.UserID,
+			Image:       data.Image,
+			Title:       data.Title,
+			CategoryId:  data.CategoryId,
+			Description: data.Description,
+			Location:    data.Location,
+			Date:        data.Date,
+			Quota:       data.Quota,
+		})
+	}
+
+	return events, nil
+}
+
 func (r *queryResolver) GetComments(ctx context.Context, eventID int) ([]*_models.Comment, error) {
 	comments := []*_models.Comment{}
 

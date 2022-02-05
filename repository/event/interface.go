@@ -7,6 +7,7 @@ type EventInterface interface {
 	GetEvent(id int) (_models.Event, error)
 	GetEventKeyword(keyword string) ([]_models.Event, error)
 	GetEventLocation(location string) ([]_models.Event, error)
+	GetEventMostAttendant() ([]_models.Event, error)
 	GetOwnEvent(userID int) ([]_models.Event, error)
 	CreateEvent(event _models.Event) error
 	UpdateEvent(event _models.Event) error
