@@ -21,6 +21,9 @@ type User {
   address: String!
   occupation: String!
   phone: String!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time!
 }
 
 type Event {
@@ -32,6 +35,9 @@ type Event {
   location: String!
   date: Time!
   quota: Int!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time!
 }
 
 type Comment {
@@ -39,6 +45,9 @@ type Comment {
   userID: Int!
   eventID: Int!
   content: String!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time!
 }
 
 type Participant {
@@ -46,6 +55,9 @@ type Participant {
   eventID: Int!
   userID: Int!
   status: Boolean!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time!
 }
 
 input NewUser {
@@ -70,6 +82,7 @@ input NewEvent {
 	userID: Int
 	image: String!
 	title: String!
+  category_id: Int!
 	description: String!
 	location: String!
 	date: Time!
@@ -77,9 +90,9 @@ input NewEvent {
 }
 
 input EditEvent {
-	userID: Int!
 	image: String
 	title: String
+  category_id: Int
 	description: String
 	location: String
 	date: Time
@@ -87,26 +100,20 @@ input EditEvent {
 }
 
 input NewParticipant {
-	userID: Int!
 	eventID: Int!
 	status: Boolean!
 }
 
 input EditParticipant {
-	userID: Int
-	eventID: Int
-	Status: Boolean
+	status: Boolean
 }
 
 input NewComment {
-	userID: Int!
 	eventID: Int!
-	status: Boolean!
+	content: String!
 }
 
 input EditComment {
-	userID: Int
-	eventID: Int
 	content: String
 }
 
@@ -140,7 +147,7 @@ type Mutation {
 
   createParticipant(input: NewParticipant): Response!
   updateParticipant(id: Int!, input: EditParticipant): Response!
-  deleteParticipant(id: Int!): Response!
+  deleteParticipant(eventID: Int!): Response!
 
   createComment(input: NewComment): Response!
   updateComment(id: Int!, input: EditComment): Response!

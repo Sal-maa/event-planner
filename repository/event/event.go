@@ -19,7 +19,7 @@ func New(db *sql.DB) *EventRepository {
 
 func (r *EventRepository) GetEvents() ([]_models.Event, error) {
 	var events []_models.Event
-	rows, err := r.db.Query(`SELECT id, user_id, image, title, description, location, date, quota FROM events ORDER BY id ASC`)
+	rows, err := r.db.Query(`SELECT id, user_id, image, title,category_id, description, location, date, quota FROM events ORDER BY id ASC`)
 	if err != nil {
 		log.Fatalf("Error")
 	}
@@ -29,7 +29,7 @@ func (r *EventRepository) GetEvents() ([]_models.Event, error) {
 	for rows.Next() {
 		var event _models.Event
 
-		err = rows.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.Description, &event.Location, &event.Date, &event.Quota)
+		err = rows.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.CategoryId, &event.Description, &event.Location, &event.Date, &event.Quota)
 		if err != nil {
 			log.Fatalf("Error")
 		}
@@ -43,9 +43,9 @@ func (r *EventRepository) GetEvents() ([]_models.Event, error) {
 func (r *EventRepository) GetEvent(id int) (_models.Event, error) {
 	var event _models.Event
 
-	row := r.db.QueryRow(`SELECT id, user_id, image, title, description, location, date, quota FROM events WHERE id = ?`, id)
+	row := r.db.QueryRow(`SELECT id, user_id, image, title, category_id,description, location, date, quota FROM events WHERE id = ?`, id)
 
-	err := row.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.Description, &event.Location, &event.Date, &event.Quota)
+	err := row.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.CategoryId, &event.Description, &event.Location, &event.Date, &event.Quota)
 	if err != nil {
 		return event, err
 	}
@@ -55,7 +55,7 @@ func (r *EventRepository) GetEvent(id int) (_models.Event, error) {
 
 func (r *EventRepository) GetEventKeyword(keyword string) ([]_models.Event, error) {
 	var events []_models.Event
-	rows, err := r.db.Query(`SELECT id, user_id, image, title, description, location, date, quota FROM events WHERE title LIKE ? `, "%"+keyword+"%")
+	rows, err := r.db.Query(`SELECT id, user_id, image, title,category_id, description, location, date, quota FROM events WHERE title LIKE ? `, "%"+keyword+"%")
 	if err != nil {
 		log.Fatalf("Error")
 	}
@@ -64,7 +64,7 @@ func (r *EventRepository) GetEventKeyword(keyword string) ([]_models.Event, erro
 	for rows.Next() {
 		var event _models.Event
 
-		err := rows.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.Description, &event.Location, &event.Date, &event.Quota)
+		err := rows.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.CategoryId, &event.Description, &event.Location, &event.Date, &event.Quota)
 		if err != nil {
 			log.Fatalf("Error")
 		}
@@ -77,7 +77,7 @@ func (r *EventRepository) GetEventKeyword(keyword string) ([]_models.Event, erro
 
 func (r *EventRepository) GetEventLocation(location string) ([]_models.Event, error) {
 	var events []_models.Event
-	rows, err := r.db.Query(`SELECT id, user_id, image, title, description, location, date, quota FROM events WHERE location LIKE ?`, "%"+location+"%")
+	rows, err := r.db.Query(`SELECT id, user_id, image, title,category_id, description, location, date, quota FROM events WHERE location LIKE ?`, "%"+location+"%")
 	if err != nil {
 		log.Fatalf("Error")
 	}
@@ -86,7 +86,7 @@ func (r *EventRepository) GetEventLocation(location string) ([]_models.Event, er
 	for rows.Next() {
 		var event _models.Event
 
-		err := rows.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.Description, &event.Location, &event.Date, &event.Quota)
+		err := rows.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.CategoryId, &event.Description, &event.Location, &event.Date, &event.Quota)
 		if err != nil {
 			log.Fatalf("Error")
 		}
@@ -99,7 +99,7 @@ func (r *EventRepository) GetEventLocation(location string) ([]_models.Event, er
 
 func (r *EventRepository) GetOwnEvent(userID int) ([]_models.Event, error) {
 	var events []_models.Event
-	rows, err := r.db.Query(`SELECT id, user_id, image, title, description, location, date, quota FROM events WHERE user_id = ?`, userID)
+	rows, err := r.db.Query(`SELECT id, user_id, image, title,category_id, description, location, date, quota FROM events WHERE user_id = ?`, userID)
 	if err != nil {
 		log.Fatalf("Error")
 	}
@@ -109,7 +109,7 @@ func (r *EventRepository) GetOwnEvent(userID int) ([]_models.Event, error) {
 	for rows.Next() {
 		var event _models.Event
 
-		err := rows.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.Description, &event.Location, &event.Date, &event.Quota)
+		err := rows.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.CategoryId, &event.Description, &event.Location, &event.Date, &event.Quota)
 		if err != nil {
 			log.Fatalf("Error")
 		}
@@ -121,6 +121,42 @@ func (r *EventRepository) GetOwnEvent(userID int) ([]_models.Event, error) {
 }
 
 func (r *EventRepository) CreateEvent(event _models.Event) error {
-	_, err := r.db.Exec("INSERT INTO events(user_id, image, title, description, location, date, quota) VALUES(?,?,?,?,?,?,?)", event.UserID, event.Image, event.Title, event.Description, event.Location, event.Date, event.Quota)
+	_, err := r.db.Exec("INSERT INTO events(user_id, image, title,category_id, description, location, date, quota) VALUES(?,?,?,?,?,?,?,?)", event.UserID, event.Image, event.Title, event.CategoryId, event.Description, event.Location, event.Date, event.Quota)
 	return err
+}
+
+func (r *EventRepository) UpdateEvent(event _models.Event) error {
+	query := `UPDATE events SET image = ?, title = ?, category_id = ?, description = ?, location = ?, date = ?, quota = ? WHERE id = ?`
+
+	statement, err := r.db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer statement.Close()
+
+	_, err = statement.Exec(event.Image, event.Title, event.CategoryId, event.Description, event.Location, event.Date, event.Quota, event.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *EventRepository) DeleteEvent(event _models.Event) error {
+	query := `DELETE FROM events WHERE id = ?`
+
+	statement, err := r.db.Prepare(query)
+	if err != nil {
+		return err
+	}
+
+	defer statement.Close()
+
+	_, err = statement.Exec(event.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

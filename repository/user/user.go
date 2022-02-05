@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"log"
 
 	_models "github.com/justjundana/event-planner/models"
 )
@@ -45,6 +46,29 @@ func (r *UserRepository) Profile(id int) (_models.User, error) {
 	}
 
 	return user, nil
+}
+
+func (r *UserRepository) GetUsers() ([]_models.User, error) {
+	var users []_models.User
+	rows, err := r.db.Query(`SELECT id, name, email, password, address, occupation, phone FROM users ORDER BY id ASC`)
+	if err != nil {
+		log.Fatalf("Error")
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var user _models.User
+
+		err = rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Address, &user.Occupation, &user.Phone)
+		if err != nil {
+			log.Fatalf("Error")
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
 }
 
 func (r *UserRepository) UpdateUser(user _models.User) error {

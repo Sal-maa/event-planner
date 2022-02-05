@@ -7,15 +7,13 @@ import (
 )
 
 type EditComment struct {
-	UserID  *int    `json:"userID"`
-	EventID *int    `json:"eventID"`
 	Content *string `json:"content"`
 }
 
 type EditEvent struct {
-	UserID      int        `json:"userID"`
 	Image       *string    `json:"image"`
 	Title       *string    `json:"title"`
+	CategoryID  *int       `json:"category_id"`
 	Description *string    `json:"description"`
 	Location    *string    `json:"location"`
 	Date        *time.Time `json:"date"`
@@ -23,9 +21,7 @@ type EditEvent struct {
 }
 
 type EditParticipant struct {
-	UserID  *int  `json:"userID"`
-	EventID *int  `json:"eventID"`
-	Status  *bool `json:"Status"`
+	Status *bool `json:"status"`
 }
 
 type EditUser struct {
@@ -43,15 +39,15 @@ type LoginResponse struct {
 }
 
 type NewComment struct {
-	UserID  int  `json:"userID"`
-	EventID int  `json:"eventID"`
-	Status  bool `json:"status"`
+	EventID int    `json:"eventID"`
+	Content string `json:"content"`
 }
 
 type NewEvent struct {
 	UserID      *int      `json:"userID"`
 	Image       string    `json:"image"`
 	Title       string    `json:"title"`
+	CategoryID  int       `json:"category_id"`
 	Description string    `json:"description"`
 	Location    string    `json:"location"`
 	Date        time.Time `json:"date"`
@@ -59,7 +55,6 @@ type NewEvent struct {
 }
 
 type NewParticipant struct {
-	UserID  int  `json:"userID"`
 	EventID int  `json:"eventID"`
 	Status  bool `json:"status"`
 }

@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 
 	_generated "github.com/justjundana/event-planner/graph/generated"
@@ -77,6 +78,7 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input *_model.NewEve
 	eventData := _models.Event{}
 	eventData.UserID = userId.ID
 	eventData.Title = input.Title
+	eventData.CategoryId = input.CategoryID
 	eventData.Image = input.Image
 	eventData.Description = input.Description
 	eventData.Location = input.Location
@@ -88,35 +90,159 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input *_model.NewEve
 }
 
 func (r *mutationResolver) UpdateEvent(ctx context.Context, id int, input *_model.EditEvent) (*_model.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	userId := _middleware.ForContext(ctx)
+	if userId == nil {
+		return &_model.Response{}, errors.New("unauthorized")
+	}
+
+	event, err := r.eventRepository.GetEvent(id)
+	if err != nil {
+		return nil, errors.New("not found")
+	}
+
+	if event.UserID != userId.ID {
+		return &_model.Response{Code: http.StatusForbidden, Message: "you don't have permission to update this event", Success: false}, nil
+	}
+
+	event.Image = *input.Image
+	event.Title = *input.Title
+	event.CategoryId = *input.CategoryID
+	event.Description = *input.Description
+	event.Location = *input.Location
+	event.Date = *input.Date
+	event.Quota = *input.Quota
+
+	updateErr := r.eventRepository.UpdateEvent(event)
+	return &_model.Response{Code: http.StatusOK, Message: "Update event Success", Success: true}, updateErr
 }
 
 func (r *mutationResolver) DeleteEvent(ctx context.Context, id int) (*_model.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	userId := _middleware.ForContext(ctx)
+	if userId == nil {
+		return &_model.Response{}, errors.New("unauthorized")
+	}
+
+	event, err := r.eventRepository.GetEvent(id)
+	if err != nil {
+		return nil, errors.New("not found")
+	}
+
+	if event.UserID != userId.ID {
+		return &_model.Response{Code: http.StatusForbidden, Message: "you don't have permission to delete this event", Success: false}, nil
+	}
+
+	deleteErr := r.eventRepository.DeleteEvent(event)
+	return &_model.Response{Code: http.StatusOK, Message: "Delete event Success", Success: true}, deleteErr
 }
 
 func (r *mutationResolver) CreateParticipant(ctx context.Context, input *_model.NewParticipant) (*_model.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	userId := _middleware.ForContext(ctx)
+	if userId == nil {
+		return &_model.Response{}, errors.New("unauthorized")
+	}
+
+	checkParticipant, _ := r.participantRepository.CheckParticipant(userId.ID, input.EventID)
+	if checkParticipant.UserID > 0 {
+		return &_model.Response{Code: http.StatusForbidden, Message: "you have been registered in this event", Success: false}, nil
+	}
+
+	participant := _models.Participant{}
+	participant.EventID = input.EventID
+	participant.UserID = userId.ID
+	participant.Status = input.Status
+
+	createErr := r.participantRepository.CreateParticipant(participant)
+	return &_model.Response{Code: http.StatusOK, Message: "You have been successfully registered in this event", Success: true}, createErr
 }
 
 func (r *mutationResolver) UpdateParticipant(ctx context.Context, id int, input *_model.EditParticipant) (*_model.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	userId := _middleware.ForContext(ctx)
+	if userId == nil {
+		return &_model.Response{}, errors.New("unauthorized")
+	}
+
+	participant, err := r.participantRepository.GetParticipant(id)
+	if err != nil {
+		return nil, errors.New("not found")
+	}
+
+	if participant.UserID != userId.ID {
+		return &_model.Response{Code: http.StatusForbidden, Message: "you don't have permission to update this event", Success: false}, nil
+	}
+
+	participant.Status = *input.Status
+
+	updateErr := r.participantRepository.UpdateParticipant(participant)
+	return &_model.Response{Code: http.StatusOK, Message: "Update participant status success", Success: true}, updateErr
 }
 
-func (r *mutationResolver) DeleteParticipant(ctx context.Context, id int) (*_model.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) DeleteParticipant(ctx context.Context, eventID int) (*_model.Response, error) {
+	userId := _middleware.ForContext(ctx)
+	if userId == nil {
+		return &_model.Response{}, errors.New("unauthorized")
+	}
+
+	participant := _models.Participant{}
+	participant.EventID = eventID
+	participant.UserID = userId.ID
+
+	deleteErr := r.participantRepository.DeleteParticipant(participant)
+	return &_model.Response{Code: http.StatusOK, Message: "Delete participant Success", Success: true}, deleteErr
 }
 
 func (r *mutationResolver) CreateComment(ctx context.Context, input *_model.NewComment) (*_model.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	userId := _middleware.ForContext(ctx)
+	if userId == nil {
+		return &_model.Response{}, errors.New("unauthorized")
+	}
+
+	comment := _models.Comment{}
+	comment.EventID = input.EventID
+	comment.UserID = userId.ID
+	comment.Content = input.Content
+
+	createErr := r.commentRepository.CreateComment(comment)
+	return &_model.Response{Code: http.StatusOK, Message: "Create comment Success", Success: true}, createErr
 }
 
 func (r *mutationResolver) UpdateComment(ctx context.Context, id int, input *_model.EditComment) (*_model.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	userId := _middleware.ForContext(ctx)
+	if userId == nil {
+		return &_model.Response{}, errors.New("unauthorized")
+	}
+
+	comment, err := r.commentRepository.GetComment(id)
+	if err != nil {
+		return nil, errors.New("not found")
+	}
+
+	if comment.UserID != userId.ID {
+		return &_model.Response{Code: http.StatusForbidden, Message: "you don't have permission to update this comment", Success: false}, nil
+	}
+
+	comment.Content = *input.Content
+
+	updateErr := r.commentRepository.UpdateComment(comment)
+	return &_model.Response{Code: http.StatusOK, Message: "Update comment Success", Success: true}, updateErr
 }
 
 func (r *mutationResolver) DeleteComment(ctx context.Context, id int) (*_model.Response, error) {
-	panic(fmt.Errorf("not implemented"))
+	userId := _middleware.ForContext(ctx)
+	if userId == nil {
+		return &_model.Response{}, errors.New("unauthorized")
+	}
+
+	comment, err := r.commentRepository.GetComment(id)
+	if err != nil {
+		return nil, errors.New("not found")
+	}
+
+	if comment.UserID != userId.ID {
+		return &_model.Response{Code: http.StatusForbidden, Message: "you don't have permission to update this comment", Success: false}, nil
+	}
+
+	deleteErr := r.commentRepository.DeleteComment(comment)
+	return &_model.Response{Code: http.StatusOK, Message: "Delete comment Success", Success: true}, deleteErr
 }
 
 func (r *queryResolver) Login(ctx context.Context, email string, password string) (*_model.LoginResponse, error) {
@@ -161,7 +287,26 @@ func (r *queryResolver) GetProfile(ctx context.Context) (*_models.User, error) {
 }
 
 func (r *queryResolver) GetUsers(ctx context.Context) ([]*_models.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	users := []*_models.User{}
+
+	responseData, err := r.userRepository.GetUsers()
+	if err != nil {
+		return nil, errors.New("not found")
+	}
+
+	for _, data := range responseData {
+		users = append(users, &_models.User{
+			ID:         data.ID,
+			Name:       data.Name,
+			Email:      data.Email,
+			Password:   data.Password,
+			Address:    data.Address,
+			Occupation: data.Occupation,
+			Phone:      data.Phone,
+		})
+	}
+
+	return users, nil
 }
 
 func (r *queryResolver) GetUser(ctx context.Context, id int) (*_models.User, error) {
@@ -202,6 +347,7 @@ func (r *queryResolver) GetOwnEvent(ctx context.Context) ([]*_models.Event, erro
 			UserID:      data.UserID,
 			Image:       data.Image,
 			Title:       data.Title,
+			CategoryId:  data.CategoryId,
 			Description: data.Description,
 			Location:    data.Location,
 			Date:        data.Date,
@@ -226,6 +372,7 @@ func (r *queryResolver) GetEvents(ctx context.Context) ([]*_models.Event, error)
 			UserID:      data.UserID,
 			Image:       data.Image,
 			Title:       data.Title,
+			CategoryId:  data.CategoryId,
 			Description: data.Description,
 			Location:    data.Location,
 			Date:        data.Date,
@@ -259,6 +406,7 @@ func (r *queryResolver) GetEventKeyword(ctx context.Context, search string) ([]*
 			UserID:      data.UserID,
 			Image:       data.Image,
 			Title:       data.Title,
+			CategoryId:  data.CategoryId,
 			Description: data.Description,
 			Location:    data.Location,
 			Date:        data.Date,
@@ -283,6 +431,7 @@ func (r *queryResolver) GetEventLocation(ctx context.Context, search string) ([]
 			UserID:      data.UserID,
 			Image:       data.Image,
 			Title:       data.Title,
+			CategoryId:  data.CategoryId,
 			Description: data.Description,
 			Location:    data.Location,
 			Date:        data.Date,
