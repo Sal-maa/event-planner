@@ -25,6 +25,7 @@ type EditParticipant struct {
 }
 
 type EditUser struct {
+	Avatar     *string `json:"avatar"`
 	Name       *string `json:"name"`
 	Email      *string `json:"email"`
 	Password   *string `json:"password"`
@@ -60,12 +61,13 @@ type NewParticipant struct {
 }
 
 type NewUser struct {
-	Name       string `json:"name"`
-	Email      string `json:"email"`
-	Password   string `json:"password"`
-	Address    string `json:"address"`
-	Occupation string `json:"occupation"`
-	Phone      string `json:"phone"`
+	Avatar     *string `json:"avatar"`
+	Name       string  `json:"name"`
+	Email      string  `json:"email"`
+	Password   string  `json:"password"`
+	Address    string  `json:"address"`
+	Occupation string  `json:"occupation"`
+	Phone      string  `json:"phone"`
 }
 
 type Response struct {
