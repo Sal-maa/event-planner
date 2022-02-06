@@ -126,10 +126,12 @@ type Query {
   getUser(id: Int!): User!
 
   getOwnEvent: [Event]!
-  getEvents: [Event]!
+  getParticipateEvent: [Event]!
+  
+  getPaginationEvents(limit:Int, offset:Int): [Event]!
+  getJoinableEvents: [Event]!
   getEvent(id: Int!): Event!
-  getEventKeyword(search: String!): [Event]!
-  getEventLocation(search: String!): [Event]!
+  getEventsBySearch(search: String!): [Event]!
   getEventMostAttendant: [Event]!
 
   getComments(eventID: Int!): [Comment]!
