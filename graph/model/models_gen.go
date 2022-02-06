@@ -61,13 +61,12 @@ type NewParticipant struct {
 }
 
 type NewUser struct {
-	Avatar     *string `json:"avatar"`
-	Name       string  `json:"name"`
-	Email      string  `json:"email"`
-	Password   string  `json:"password"`
-	Address    string  `json:"address"`
-	Occupation string  `json:"occupation"`
-	Phone      string  `json:"phone"`
+	Name       string `json:"name"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
+	Address    string `json:"address"`
+	Occupation string `json:"occupation"`
+	Phone      string `json:"phone"`
 }
 
 type Response struct {
