@@ -315,6 +315,7 @@ func (r *queryResolver) GetProfile(ctx context.Context) (*_models.User, error) {
 
 	dataUser := _models.User{
 		ID:         responseData.ID,
+		Avatar:     responseData.Avatar,
 		Name:       responseData.Name,
 		Email:      responseData.Email,
 		Password:   responseData.Password,
@@ -337,6 +338,7 @@ func (r *queryResolver) GetUsers(ctx context.Context) ([]*_models.User, error) {
 	for _, data := range responseData {
 		users = append(users, &_models.User{
 			ID:         data.ID,
+			Avatar:     data.Avatar,
 			Name:       data.Name,
 			Email:      data.Email,
 			Password:   data.Password,
@@ -357,6 +359,7 @@ func (r *queryResolver) GetUser(ctx context.Context, id int) (*_models.User, err
 
 	dataUser := _models.User{
 		ID:         responseData.ID,
+		Avatar:     responseData.Avatar,
 		Name:       responseData.Name,
 		Email:      responseData.Email,
 		Password:   responseData.Password,
