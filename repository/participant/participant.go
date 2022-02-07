@@ -19,7 +19,16 @@ func New(db *sql.DB) *ParticipantRepository {
 
 func (r *ParticipantRepository) GetParticipants(eventID int) ([]_models.Participant, error) {
 	var participants []_models.Participant
-	rows, err := r.db.Query(`SELECT id, user_id, event_id, status FROM participants WHERE status = 1 AND event_id = ?`, eventID)
+	rows, err := r.db.Query(`
+	SELECT 
+		participants.id, participants.user_id, participants.event_id, participants.status,
+		users.id, users.avatar, users.name, users.email, users.address, users.occupation, users.phone
+	FROM 
+		participants
+	JOIN
+		users ON users.id = participants.user_id
+	WHERE status = 1 AND event_id = ?`, eventID)
+
 	if err != nil {
 		log.Fatalf("Error")
 	}
@@ -29,7 +38,7 @@ func (r *ParticipantRepository) GetParticipants(eventID int) ([]_models.Particip
 	for rows.Next() {
 		var participant _models.Participant
 
-		err := rows.Scan(&participant.ID, &participant.UserID, &participant.EventID, &participant.Status)
+		err := rows.Scan(&participant.ID, &participant.UserID, &participant.EventID, &participant.Status, &participant.User.ID, &participant.User.Avatar, &participant.User.Name, &participant.User.Email, &participant.User.Address, &participant.User.Occupation, &participant.User.Phone)
 		if err != nil {
 			log.Fatalf("Error")
 		}

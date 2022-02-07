@@ -2,6 +2,7 @@ package comment
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	_models "github.com/justjundana/event-planner/models"
@@ -19,8 +20,18 @@ func New(db *sql.DB) *CommentRepository {
 
 func (r *CommentRepository) GetComments(eventID int) ([]_models.Comment, error) {
 	var comments []_models.Comment
-	rows, err := r.db.Query(`SELECT id, user_id, event_id, content FROM comments WHERE event_id = ?`, eventID)
+
+	rows, err := r.db.Query(`
+	SELECT 
+		comments.id, comments.user_id, comments.event_id, comments.content,
+		users.id, users.avatar, users.name, users.email, users.address, users.occupation, users.phone
+	FROM 
+		comments
+	JOIN
+		users ON users.id = comments.user_id 
+	WHERE event_id = ?`, eventID)
 	if err != nil {
+		fmt.Println(err)
 		log.Fatalf("Error")
 	}
 
@@ -29,7 +40,7 @@ func (r *CommentRepository) GetComments(eventID int) ([]_models.Comment, error) 
 	for rows.Next() {
 		var comment _models.Comment
 
-		err := rows.Scan(&comment.ID, &comment.UserID, &comment.EventID, &comment.Content)
+		err := rows.Scan(&comment.ID, &comment.UserID, &comment.EventID, &comment.Content, &comment.User.ID, &comment.User.Avatar, &comment.User.Name, &comment.User.Email, &comment.User.Address, &comment.User.Occupation, &comment.User.Phone)
 		if err != nil {
 			log.Fatalf("Error")
 		}

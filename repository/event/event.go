@@ -2,7 +2,6 @@ package event
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	_models "github.com/justjundana/event-planner/models"
@@ -20,7 +19,6 @@ func New(db *sql.DB) *EventRepository {
 
 func (r *EventRepository) GetEvents() ([]_models.Event, error) {
 	var events []_models.Event
-	fmt.Println("repo 1")
 	// this condition will run when events joinable
 	rows, err := r.db.Query(`
 		SELECT
@@ -36,7 +34,6 @@ func (r *EventRepository) GetEvents() ([]_models.Event, error) {
 		ORDER BY 
 			events.date ASC`)
 	if err != nil {
-		fmt.Println(err)
 		log.Fatalf("Error")
 	}
 
@@ -45,7 +42,7 @@ func (r *EventRepository) GetEvents() ([]_models.Event, error) {
 	for rows.Next() {
 		var event _models.Event
 
-		err = rows.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.CategoryId, &event.Description, &event.Location, &event.Date, &event.Quota)
+		err = rows.Scan(&event.ID, &event.UserID, &event.CategoryId, &event.Image, &event.Title, &event.Description, &event.Location, &event.Date, &event.Quota)
 		if err != nil {
 			log.Fatalf("Error")
 		}
@@ -88,9 +85,22 @@ func (r *EventRepository) Pagination(limit, offset *int) ([]_models.Event, error
 func (r *EventRepository) GetEvent(id int) (_models.Event, error) {
 	var event _models.Event
 
-	row := r.db.QueryRow(`SELECT id, user_id, image, title, category_id,description, location, date, quota FROM events WHERE id = ?`, id)
+	row := r.db.QueryRow(`
+	SELECT
+		events.id, events.user_id, events.image, events.title, events.category_id, events.description, events.location, events.date, events.quota,
+		users.id, users.avatar, users.name, users.email, users.address, users.occupation, users.phone
+	FROM
+		events
+	JOIN 
+		users ON users.id = events.user_id
+	WHERE
+		events.id = ?`, id)
 
-	err := row.Scan(&event.ID, &event.UserID, &event.Image, &event.Title, &event.CategoryId, &event.Description, &event.Location, &event.Date, &event.Quota)
+	err := row.Scan(
+		&event.ID, &event.UserID, &event.Image, &event.Title, &event.CategoryId, &event.Description, &event.Location, &event.Date, &event.Quota,
+		&event.User.ID, &event.User.Avatar, &event.User.Name, &event.User.Email, &event.User.Address, &event.User.Occupation, &event.User.Phone,
+	)
+
 	if err != nil {
 		return event, err
 	}

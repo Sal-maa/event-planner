@@ -37,6 +37,8 @@ type Event {
   location: String!
   date: Time!
   quota: Int!
+  user: User!
+  comments: [Comment]
   createdAt: Time!
   updatedAt: Time!
   deletedAt: Time!
@@ -56,6 +58,7 @@ type Participant {
   id: ID!
   eventID: Int!
   userID: Int!
+  user: User!
   status: Boolean!
   createdAt: Time!
   updatedAt: Time!

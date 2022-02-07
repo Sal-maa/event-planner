@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -97,7 +96,6 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input *_model.NewEve
 		return &_model.Response{}, errors.New("unauthorized")
 	}
 
-	fmt.Println("date", input.Date)
 	eventData := _models.Event{}
 	eventData.UserID = userId.ID
 	eventData.Title = input.Title
@@ -287,7 +285,6 @@ func (r *mutationResolver) DeleteComment(ctx context.Context, id int) (*_model.R
 func (r *queryResolver) Login(ctx context.Context, email string, password string) (*_model.LoginResponse, error) {
 	user, err := r.userRepository.Login(email)
 	if err != nil {
-		fmt.Println(err)
 		return nil, errors.New("not found")
 	}
 
@@ -475,9 +472,46 @@ func (r *queryResolver) GetJoinableEvents(ctx context.Context) ([]*_models.Event
 }
 
 func (r *queryResolver) GetEvent(ctx context.Context, id int) (*_models.Event, error) {
-	responseData, err := r.eventRepository.GetEvent(id)
+	event, err := r.eventRepository.GetEvent(id)
 	if err != nil {
 		return nil, errors.New("not found")
+	}
+
+	responseData := _models.Event{
+		ID:          event.ID,
+		UserID:      event.UserID,
+		Image:       event.Image,
+		Title:       event.Title,
+		CategoryId:  event.CategoryId,
+		Description: event.Description,
+		Location:    event.Location,
+		Date:        event.Date,
+		Quota:       event.Quota,
+		User: _models.User{
+			ID:         event.User.ID,
+			Avatar:     event.User.Avatar,
+			Name:       event.User.Name,
+			Email:      event.User.Email,
+			Address:    event.User.Address,
+			Occupation: event.User.Occupation,
+			Phone:      event.User.Phone,
+		},
+	}
+
+	comments, err := r.commentRepository.GetComments(id)
+	if err != nil {
+		return nil, errors.New("not found")
+	}
+
+	for _, comment := range comments {
+		comment := _models.Comment{
+			ID:      comment.ID,
+			EventID: comment.EventID,
+			UserID:  comment.UserID,
+			Content: comment.Content,
+		}
+
+		responseData.Comments = append(responseData.Comments, comment)
 	}
 
 	return &responseData, nil
@@ -546,6 +580,7 @@ func (r *queryResolver) GetComments(ctx context.Context, eventID int) ([]*_model
 			ID:      data.ID,
 			EventID: data.EventID,
 			UserID:  data.UserID,
+			User:    data.User,
 			Content: data.Content,
 		})
 	}
@@ -566,6 +601,7 @@ func (r *queryResolver) GetParticipants(ctx context.Context, eventID int) ([]*_m
 			ID:      data.ID,
 			EventID: data.EventID,
 			UserID:  data.UserID,
+			User:    data.User,
 			Status:  data.Status,
 		})
 	}

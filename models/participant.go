@@ -9,6 +9,7 @@ type Participant struct {
 	EventID   int       `json:"event_id" form:"event_id"`
 	UserID    int       `json:"user_id" form:"user_id"`
 	Status    bool      `json:"status" form:"status"`
+	User      User      `json:"user" form:"user"`
 	CreatedAt time.Time `json:"created_at" form:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" form:"updated_at"`
 	DeletedAt time.Time `json:"deleted_at" form:"deleted_at"`
