@@ -56,11 +56,11 @@ func (r *UserRepository) Login(email string) (_models.User, error) {
 }
 
 func (r *UserRepository) Profile(id int) (_models.User, error) {
-	row := r.db.QueryRow(`SELECT id, name, email, password, address, occupation, phone FROM users WHERE id = ?;`, id)
+	row := r.db.QueryRow(`SELECT id, avatar, name, email, password, address, occupation, phone FROM users WHERE id = ?;`, id)
 
 	var user _models.User
 
-	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Address, &user.Occupation, &user.Phone)
+	err := row.Scan(&user.ID, &user.Avatar, &user.Name, &user.Email, &user.Password, &user.Address, &user.Occupation, &user.Phone)
 	if err != nil {
 		return user, err
 	}
@@ -70,7 +70,7 @@ func (r *UserRepository) Profile(id int) (_models.User, error) {
 
 func (r *UserRepository) GetUsers() ([]_models.User, error) {
 	var users []_models.User
-	rows, err := r.db.Query(`SELECT id, name, email, password, address, occupation, phone FROM users ORDER BY id ASC`)
+	rows, err := r.db.Query(`SELECT id, avatar, name, email, password, address, occupation, phone FROM users ORDER BY id ASC`)
 	if err != nil {
 		log.Fatalf("Error")
 	}
@@ -80,7 +80,7 @@ func (r *UserRepository) GetUsers() ([]_models.User, error) {
 	for rows.Next() {
 		var user _models.User
 
-		err = rows.Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Address, &user.Occupation, &user.Phone)
+		err = rows.Scan(&user.ID, &user.Avatar, &user.Name, &user.Email, &user.Password, &user.Address, &user.Occupation, &user.Phone)
 		if err != nil {
 			log.Fatalf("Error")
 		}
@@ -93,8 +93,8 @@ func (r *UserRepository) GetUsers() ([]_models.User, error) {
 
 func (r *UserRepository) UpdateUser(user _models.User) error {
 	_, err := r.db.Exec(`UPDATE users 
-						SET name = ?, email = ?, password = ?, address = ?, occupation =?, phone = ?, updated_at = CURRENT_TIMESTAMP
-						WHERE id = ?`, user.Name, user.Email, user.Password, user.Address, user.Occupation, user.Phone, user.ID)
+						SET avatar = ?, name = ?, email = ?, password = ?, address = ?, occupation =?, phone = ?, updated_at = CURRENT_TIMESTAMP
+						WHERE id = ?`, user.Avatar, user.Name, user.Email, user.Password, user.Address, user.Occupation, user.Phone, user.ID)
 	return err
 }
 
