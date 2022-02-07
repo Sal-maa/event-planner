@@ -3,6 +3,7 @@ package event
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	_models "github.com/justjundana/event-planner/models"
 )
@@ -231,12 +232,12 @@ func (r *EventRepository) GetParticipateEvent(userID int) ([]_models.Event, erro
 }
 
 func (r *EventRepository) CreateEvent(event _models.Event) error {
-	_, err := r.db.Exec("INSERT INTO events(user_id, image, title,category_id, description, location, date, quota) VALUES(?,?,?,?,?,?,?,?)", event.UserID, event.Image, event.Title, event.CategoryId, event.Description, event.Location, event.Date, event.Quota)
+	_, err := r.db.Exec("INSERT INTO events(user_id, image, title,category_id, description, location, date, quota, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", event.UserID, event.Image, event.Title, event.CategoryId, event.Description, event.Location, event.Date, event.Quota, time.Now(), time.Now())
 	return err
 }
 
 func (r *EventRepository) UpdateEvent(event _models.Event) error {
-	query := `UPDATE events SET image = ?, title = ?, category_id = ?, description = ?, location = ?, date = ?, quota = ? WHERE id = ?`
+	query := `UPDATE events SET image = ?, title = ?, category_id = ?, description = ?, location = ?, date = ?, quota = ?, updated_at = ? WHERE id = ?`
 
 	statement, err := r.db.Prepare(query)
 	if err != nil {
@@ -245,7 +246,7 @@ func (r *EventRepository) UpdateEvent(event _models.Event) error {
 
 	defer statement.Close()
 
-	_, err = statement.Exec(event.Image, event.Title, event.CategoryId, event.Description, event.Location, event.Date, event.Quota, event.ID)
+	_, err = statement.Exec(event.Image, event.Title, event.CategoryId, event.Description, event.Location, event.Date, event.Quota, time.Now(), event.ID)
 	if err != nil {
 		return err
 	}

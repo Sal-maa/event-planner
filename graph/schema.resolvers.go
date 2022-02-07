@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -18,13 +19,6 @@ import (
 
 func (r *mutationResolver) Register(ctx context.Context, input *_model.NewUser) (*_models.User, error) {
 	userData := _models.User{}
-	checkEmail, errCheck := r.userRepository.Login(input.Email)
-	if errCheck != nil {
-		return nil, errCheck
-	}
-	if checkEmail.Email == input.Email {
-		return nil, errors.New("email is already exist")
-	}
 
 	userData.Name = input.Name
 	userData.Email = input.Email
@@ -33,6 +27,16 @@ func (r *mutationResolver) Register(ctx context.Context, input *_model.NewUser) 
 	userData.Address = input.Address
 	userData.Occupation = input.Occupation
 	userData.Phone = input.Phone
+
+	checkEmail, errCheck := r.userRepository.CheckEmail(userData)
+	if errCheck != nil {
+		fmt.Println("errCheck", errCheck)
+		return nil, errCheck
+	}
+
+	if checkEmail.Email == userData.Email {
+		return nil, errors.New("email is already exist")
+	}
 
 	responseData, err := r.userRepository.Register(userData)
 	return &responseData, err

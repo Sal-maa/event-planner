@@ -3,6 +3,7 @@ package participant
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	_models "github.com/justjundana/event-planner/models"
 )
@@ -82,7 +83,7 @@ func (r *ParticipantRepository) CheckParticipant(userID int, eventID int) (_mode
 }
 
 func (r *ParticipantRepository) CreateParticipant(participant _models.Participant) error {
-	query := `INSERT INTO participants (event_id, user_id, status) VALUES (?, ?, ?)`
+	query := `INSERT INTO participants (event_id, user_id, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)`
 
 	statement, err := r.db.Prepare(query)
 	if err != nil {
@@ -91,7 +92,7 @@ func (r *ParticipantRepository) CreateParticipant(participant _models.Participan
 
 	defer statement.Close()
 
-	_, err = statement.Exec(participant.EventID, participant.UserID, participant.Status)
+	_, err = statement.Exec(participant.EventID, participant.UserID, participant.Status, time.Now(), time.Now())
 	if err != nil {
 		return err
 	}
