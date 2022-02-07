@@ -2,7 +2,6 @@ package comment
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	_models "github.com/justjundana/event-planner/models"
@@ -31,7 +30,6 @@ func (r *CommentRepository) GetComments(eventID int) ([]_models.Comment, error) 
 		users ON users.id = comments.user_id 
 	WHERE event_id = ?`, eventID)
 	if err != nil {
-		fmt.Println(err)
 		log.Fatalf("Error")
 	}
 

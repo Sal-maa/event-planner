@@ -508,6 +508,7 @@ func (r *queryResolver) GetEvent(ctx context.Context, id int) (*_models.Event, e
 			ID:      comment.ID,
 			EventID: comment.EventID,
 			UserID:  comment.UserID,
+			User:    comment.User,
 			Content: comment.Content,
 		}
 
