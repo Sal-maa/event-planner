@@ -61,7 +61,7 @@ func (r *EventRepository) Pagination(limit, offset *int) ([]_models.Event, error
 			id, user_id, image, title,category_id, description, location, date, quota 
 		FROM 
 			events 
-		ORDER BY id ASC
+		ORDER BY created_at DESC
 		LIMIT ? OFFSET ?`, limit, offset)
 	if err != nil {
 		log.Fatalf("Error")
