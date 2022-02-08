@@ -185,6 +185,11 @@ func (r *mutationResolver) CreateParticipant(ctx context.Context, input *_model.
 		return &_model.Response{Code: http.StatusForbidden, Message: "you have been registered in this event", Success: false}, nil
 	}
 
+	checkAvailable, _ := r.eventRepository.CheckEventAvailable(input.EventID)
+	if checkAvailable.ID < 1 {
+		return &_model.Response{Code: http.StatusForbidden, Message: "you cannot register in this event", Success: false}, nil
+	}
+
 	participant := _models.Participant{}
 	participant.EventID = input.EventID
 	participant.UserID = userId.ID

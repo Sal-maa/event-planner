@@ -18,20 +18,47 @@ func New(db *sql.DB) *EventRepository {
 	}
 }
 
+func (r *EventRepository) CheckEventAvailable(id int) (_models.Event, error) {
+	var event _models.Event
+
+	row := r.db.QueryRow(`
+	SELECT
+		events.id, events.user_id, events.category_id, events.image, events.title, events.description, events.location, events.date, events.quota
+	FROM
+		events
+	RIGHT JOIN 
+		participants ON participants.event_id = events.id
+	WHERE
+		CURRENT_TIMESTAMP < events.date AND events.id = ?
+	GROUP BY 
+		events.id
+	HAVING 
+		COUNT(participants.event_id) < events.quota`, id)
+
+	err := row.Scan(&event.ID, &event.UserID, &event.CategoryId, &event.Image, &event.Title, &event.Description, &event.Location, &event.Date, &event.Quota)
+	if err != nil {
+		return event, err
+	}
+
+	return event, nil
+}
+
 func (r *EventRepository) GetEvents() ([]_models.Event, error) {
 	var events []_models.Event
 	// this condition will run when events joinable
 	rows, err := r.db.Query(`
 		SELECT
-		events.id, events.user_id, events.category_id, events.image, events.title, events.description, events.location, events.date, events.quota
+			events.id, events.user_id, events.category_id, events.image, events.title, events.description, events.location, events.date, events.quota
 		FROM
 			events
-		JOIN 
+		LEFT JOIN 
 			participants ON participants.event_id = events.id
 		WHERE
-			CURRENT_TIMESTAMP < events.date AND (select COUNT(participants.event_id) AS NumberOfParticipant from events)< events.quota
+			CURRENT_TIMESTAMP < events.date
 		GROUP BY 
-			participants.event_id
+			events.id
+		HAVING 
+			COUNT(participants.event_id) < events.quota
 		ORDER BY 
 			events.date ASC`)
 	if err != nil {
