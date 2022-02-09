@@ -1,6 +1,6 @@
 services:
 
-  appDb:
+  appDatabase:
     image: bitnami/mysql
     restart: always
     environment:
