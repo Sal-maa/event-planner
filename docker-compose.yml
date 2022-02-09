@@ -1,19 +1,32 @@
 services:
 
   appDb:
-    image: bitnami/mysql
+    image: mysql
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: toor
-      MYSQL_DATABASE: eplanner
-    ports: 
-      - 3306:3306
+    container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - 'mysql_data:/bitnami/mysql/data'
+      - ./mysql-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: toor
+      MYSQL_USER: root
+      MYSQL_PASSWORD: toor
+    # image: bitnami/mysql
+    # restart: always
+    # environment:
+    #   MYSQL_ROOT_PASSWORD: toor
+    #   MYSQL_DATABASE: eplanner
+    # ports: 
+    #   - 3306:3306
+    # volumes:
+    #   - 'mysql_data:/bitnami/mysql/data'
 
-    healthcheck:
-      test: ["CMD", "mysql", "-u", "root",  "-ptoor", "-e", "show schemas"]
-      interval: 10s 
+    # healthcheck:
+    #   test: ["CMD", "mysql", "-u", "root",  "-ptoor", "-e", "show schemas"]
+    #   interval: 10s 
 
   app:
     build: .
