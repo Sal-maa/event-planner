@@ -9,7 +9,7 @@ services:
     ports: 
       - 3306:3306
     volumes:
-      - '/mysql-data:/bitnami/mysql'
+      - 'mysql_data:/bitnami/mysql/data'
 
     healthcheck:
       test: ["CMD", "mysql", "-u", "root",  "-ptoor", "-e", "show schemas"]
