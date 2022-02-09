@@ -1,19 +1,19 @@
 services:
 
-  appDatabase:
-    image: bitnami/mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: toor
-      MYSQL_DATABASE: eplanner
-    ports: 
-      - 3306:3306
-    volumes:
-      - 'mysql_data:/bitnami/mysql/data'
+  # appDatabase:
+  #   image: bitnami/mysql
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: toor
+  #     MYSQL_DATABASE: eplanner
+  #   ports: 
+  #     - 3306:3306
+  #   volumes:
+  #     - 'mysql_data:/bitnami/mysql/data'
 
-    healthcheck:
-      test: ["CMD", "mysql", "-u", "root",  "-ptoor", "-e", "show schemas"]
-      interval: 10s 
+  #   healthcheck:
+  #     test: ["CMD", "mysql", "-u", "root",  "-ptoor", "-e", "show schemas"]
+  #     interval: 10s 
 
   app:
     build: .
@@ -24,6 +24,6 @@ services:
     ports:
       - 80:8080
 
-volumes:
-  mysql_data:
-    driver: local
+# volumes:
+#   mysql_data:
+#     driver: local

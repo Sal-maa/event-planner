@@ -7,7 +7,7 @@ import (
 )
 
 func FetchConnection() *sql.DB {
-	connection := "root:toor@tcp(172.17.0.1:3306)/eplanner?charset=utf8mb4&parseTime=True&loc=Local"
+	connection := "admin:password@tcp(database-1.c9tz5kkyxqmv.ap-northeast-3.rds.amazonaws.com:3306)/eplanner?charset=utf8mb4&parseTime=True&loc=Local"
 
 	db, err := sql.Open("mysql", connection)
 	if err != nil {
