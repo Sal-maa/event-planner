@@ -46,7 +46,8 @@ Start the server
 
 ## Documentation
 
-[Open API](https://www.notion.so/Event-Planner-1984e250d24b4ae4a7c576e183e47a86)
+[Open API](https://cautious-oboe-d05.notion.site/Event-Planner-1984e250d24b4ae4a7c576e183e47a86)
+[ERD](https://app.diagrams.net/#G1r1hWAKBRKWDDteVqxfP5osS-CHTszdk2)
 
 ## Related
 
