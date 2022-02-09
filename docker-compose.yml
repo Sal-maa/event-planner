@@ -4,6 +4,7 @@ services:
     image: bitnami/mysql
     restart: always
     environment:
+      MYSQL_ROOT_HOST: '%'
       MYSQL_ROOT_PASSWORD: toor
       MYSQL_DATABASE: eplanner
     ports: 
