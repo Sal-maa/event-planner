@@ -10,9 +10,9 @@ services:
       - 3306:3306
     environment:
       MYSQL_ROOT_HOST: '%'
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: alta
+      MYSQL_USER: alta
+      MYSQL_PASSWORD: alta
   # appDatabase:
   #   image: bitnami/mysql
   #   restart: always
